@@ -1,20 +1,24 @@
 const canvas = document.querySelector("#canvas")
 const ctx = canvas.getContext("2d")
 
-
 let clickNumbers = 0
-const triangles = []
-
-// Triangle
-// array de pontos
-// objeto de cor
-// We need a intersection array to get all X that our Y has
+let triangles = []
 let triangle = {vertex: [], color: [], intersections: new Map(), minY: 999, maxY: 0}
+
+const triangleList = document.querySelector(".triangleList")
 
 if(!ctx) {
     alert('Your browser does not have canvas support or JS enabled!')
 }
 
+const clearButton = document.querySelector(".clearButton")
+clearButton.addEventListener("click", (e) => clearCanvas(true))
+
+function clearCanvas () {
+    triangleList.innerHTML = ""
+    triangles = []
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 
 function defineIntersections (triangle) {
     const minY = triangle.minY
@@ -94,11 +98,8 @@ function fillPoly(triangle) {
 
 function drawTriangle() {
     triangles.forEach(t => {
-        console.log(t)
         defineIntersections(t)
         fillPoly(t)
-
-
         ctx.beginPath()
         ctx.moveTo(t.vertex[0].x, t.vertex[0].y) 
         ctx.lineTo(t.vertex[1].x, t.vertex[1].y)
@@ -145,6 +146,24 @@ canvas.addEventListener("click", (e) => {
         if(y > triangle.maxY) triangle.maxY = y
         if(y < triangle.minY) triangle.minY = y
         triangles.push(triangle)
+        const newTriangleLI = document.createElement("li")
+        const newDeleteButton = document.createElement("button")
+        newDeleteButton.addEventListener("click", (e) => {
+            const removeblePosition = e.target.id
+            const buttonSelected = document.querySelector("button#"+removeblePosition)
+            console.log(removebleParent)
+            triangles.splice(removeblePosition - 1, 1)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            triangleList.removeChild(buttonSelected.parentNode)
+            drawTriangle()
+        })
+        newDeleteButton.innerText = "Delete"
+        newDeleteButton.setAttribute("id", triangles.length)
+        newTriangleLI.innerHTML = `Triangle ${triangles.length}`    
+        newTriangleLI.appendChild(newDeleteButton)
+        newTriangleLI
+        triangleList.appendChild(newTriangleLI)
         drawTriangle()
         triangle = {vertex: [], color: [], intersections: new Map(), minY: 999, maxY: 0}
         return

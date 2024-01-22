@@ -16,3 +16,11 @@ body {
     border-radius: 2%;
     box-shadow: 10px 5px 5px rgb(136, 134, 134);
 }
+
+.mainSection {
+    display: flex;
+    align-content: center;
+    margin: 0 auto;
+    width: 80%;
+    gap: 2rem;
+}
