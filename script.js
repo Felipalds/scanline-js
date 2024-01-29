@@ -51,7 +51,6 @@ function defineIntersections (triangle) {
     defineEdge(triangle, 1, 2)
     defineEdge(triangle, 2, 0)
 
-    
     triangle.intersections.forEach((xArray) => {
         if(xArray[0].x > xArray[1].x) {
             let temp = xArray[0]
@@ -171,7 +170,6 @@ function colorChanged (e) {
             t.vertex[typeColor].color.b = newColor.b
         }
     })
-
     drawTriangle()
 }
 
@@ -213,11 +211,10 @@ function addToList (triangle) {
     newDeleteButton.innerText = "Delete"
     newTriangleLI.setAttribute("id", id)
     newTriangleLI.innerHTML = `Triangle ${id}`    
-    newTriangleLI.appendChild(newDeleteButton)
     newTriangleLI.appendChild(v0Color)
     newTriangleLI.appendChild(v1Color)
     newTriangleLI.appendChild(v2Color)
-
+    newTriangleLI.appendChild(newDeleteButton)
     triangleList.appendChild(newTriangleLI)
 }
 
@@ -235,7 +232,6 @@ canvas.addEventListener("click", (e) => {
     let r = Math.round(Math.random() * (255 - 0) + 0)
     let g = Math.round(Math.random() * (255 - 0) + 0)
     let b = Math.round(Math.random() * (255 - 0) + 0)
-
 
     const color = {r, g, b, a:1}
     const coordinate = {x, y, color}
