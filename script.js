@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d")
 let id = 0
 let clickNumbers = 0
 let triangles = []
-let triangle = {id, vertex: [], intersections: new Map(), colors: new Map(), minY: 999, maxY: 0}
+let triangle = {id, vertex: [], intersections: new Map(), edgeColor: {}, minY: 999, maxY: 0}
 
 const triangleList = document.querySelector(".triangleList")
 
@@ -137,8 +137,13 @@ function fillPoly(triangle) {
 
 function drawTriangle() {
     triangles.forEach(t => {
+        drawCircle(t.vertex[0].x, t.vertex[0].y, {r: t.vertex[0].color.r, g:t.vertex[0].color.g, b:t.vertex[0].color.b})
+        drawCircle(t.vertex[1].x, t.vertex[1].y, {r: t.vertex[1].color.r, g:t.vertex[1].color.g, b:t.vertex[1].color.b})
+        drawCircle(t.vertex[2].x, t.vertex[2].y, {r: t.vertex[2].color.r, g:t.vertex[2].color.g, b:t.vertex[2].color.b})
+
         defineIntersections(t)
         fillPoly(t)
+        ctx.strokeStyle = `rgba(${t.edgeColor.r}, ${t.edgeColor.g}, ${t.edgeColor.b}, 1)`
         ctx.beginPath()
         ctx.moveTo(t.vertex[0].x, t.vertex[0].y) 
         ctx.lineTo(t.vertex[1].x, t.vertex[1].y)
@@ -159,15 +164,21 @@ function removeTriangle(id) {
 
 function colorChanged (e) {
     const triangleId = e.target.id
-    const typeColor = Number(e.target.className)
+    const typeColor = e.target.className === 'e' ? 'e' : Number(e.target.className)
     const newColor = hexToRgb(e.target.value)
 
 
     triangles.forEach(t => {
         if(t.id == triangleId) {
-            t.vertex[typeColor].color.r = newColor.r
-            t.vertex[typeColor].color.g = newColor.g
-            t.vertex[typeColor].color.b = newColor.b
+            if(e.target.className === 'e'){
+                t.edgeColor.r = newColor.r
+                t.edgeColor.g = newColor.g
+                t.edgeColor.b = newColor.b
+            } else {
+                t.vertex[typeColor].color.r = newColor.r
+                t.vertex[typeColor].color.g = newColor.g
+                t.vertex[typeColor].color.b = newColor.b
+            }
         }
     })
     drawTriangle()
@@ -193,12 +204,17 @@ function addToList (triangle) {
 
     const v2Color = document.createElement("input")
     v2Color.type = 'color'
-    const a = rgbToHex(triangle.vertex[2].color.r, triangle.vertex[2].color.g, triangle.vertex[2].color.b)
-    console.log(a)
     v2Color.value = rgbToHex(triangle.vertex[2].color.r, triangle.vertex[2].color.g, triangle.vertex[2].color.b)
     v2Color.addEventListener('change', colorChanged)
     v2Color.id = id
     v2Color.className = '2'
+
+    const edgeColor = document.createElement("input")
+    edgeColor.type = 'color'
+    edgeColor.value = rgbToHex(triangle.edgeColor.r, triangle.edgeColor.g, triangle.edgeColor.b)
+    edgeColor.addEventListener('change', colorChanged)
+    edgeColor.id = id
+    edgeColor.className = 'e'
 
     newDeleteButton.addEventListener("click", (e) => {
         const closestLi = e.target.closest('li')
@@ -214,6 +230,7 @@ function addToList (triangle) {
     newTriangleLI.appendChild(v0Color)
     newTriangleLI.appendChild(v1Color)
     newTriangleLI.appendChild(v2Color)
+    newTriangleLI.appendChild(edgeColor)
     newTriangleLI.appendChild(newDeleteButton)
     triangleList.appendChild(newTriangleLI)
 }
@@ -223,15 +240,24 @@ function drawSquare(x, y, {r, g, b, a}, tx, ty) {
     ctx.fillRect(x, y, tx, ty)
 }
 
+function drawCircle (x, y, {r, g, b}) {
+    ctx.beginPath()
+    ctx.arc(x, y, 5, 0, 2 * Math.PI)
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 1)`
+    ctx.fill()
+    ctx.closePath()
+}
+
 canvas.addEventListener("click", (e) => {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    drawSquare(x, y, {r: 255, g: 0, b: 0, a: 1}, 4, 4)
+    // drawSquare(x, y, {r: 0, g: 0, b: 0, a: 1}, 2, 2)
 
     let r = Math.round(Math.random() * (255 - 0) + 0)
     let g = Math.round(Math.random() * (255 - 0) + 0)
     let b = Math.round(Math.random() * (255 - 0) + 0)
+    drawCircle(x, y, {r, g, b })
 
     const color = {r, g, b, a:1}
     const coordinate = {x, y, color}
@@ -255,12 +281,17 @@ canvas.addEventListener("click", (e) => {
         clickNumbers=0
         if(y > triangle.maxY) triangle.maxY = y
         if(y < triangle.minY) triangle.minY = y
+
+        let er = Math.round(Math.random() * (255 - 0) + 0)
+        let eg = Math.round(Math.random() * (255 - 0) + 0)
+        let eb = Math.round(Math.random() * (255 - 0) + 0)
+        triangle.edgeColor = {r: er, g: eg, b: eb}
         triangles.push(triangle)
 
         addToList(triangle)
         drawTriangle()
         id++
-        triangle = {id, vertex: [], colors: new Map(), intersections: new Map(), minY: 999, maxY: 0}
+        triangle = {id, vertex: [], edgeColor:{}, intersections: new Map(), minY: 999, maxY: 0}
         return
     }
 })
