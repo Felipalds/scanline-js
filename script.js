@@ -1,6 +1,8 @@
 const canvas = document.querySelector("#canvas")
 const ctx = canvas.getContext("2d")
 
+ctx.globalCompositeOperation = "source-over";
+
 let id = 0
 let clickNumbers = 0
 let triangles = []
@@ -57,11 +59,8 @@ function defineIntersections (triangle) {
             xArray[0] = xArray[1]
             xArray[1] = temp
         }
-        const arraySize = xArray.length;
-        for (let i = 0; i < arraySize; i++) {
-          if (i % 2 === 0) xArray[i].x = Math.ceil(xArray[i].x);
-          else xArray[i].x = Math.floor(xArray[i].x);
-        }
+        xArray[0].x = Math.ceil(xArray[0].x)
+        xArray[1].x = Math.floor(xArray[1].x);
     })
 }
 
@@ -104,7 +103,6 @@ function fillPoly(triangle) {
     const initialY = triangle.minY
     const endY = triangle.maxY
     const intersections = triangle.intersections
-
     
     for (let currentY = initialY; currentY < endY; currentY++) {
       const currentEdge = intersections.get(currentY);
@@ -125,6 +123,7 @@ function fillPoly(triangle) {
 
         for (let currentX = firstX; currentX < endX; currentX++){
           drawSquare(currentX, currentY, {r:currentR, g:currentG, b:currentB, a: 1}, 1, 1);
+          console.log(currentX, currentY)
           currentR += variationR
           currentG += variationG
           currentB += variationB
@@ -143,7 +142,7 @@ function drawTriangle() {
 
         defineIntersections(t)
         fillPoly(t)
-        ctx.strokeStyle = `rgba(${t.edgeColor.r}, ${t.edgeColor.g}, ${t.edgeColor.b}, 1)`
+        ctx.strokeStyle = `rgb(${t.edgeColor.r}, ${t.edgeColor.g}, ${t.edgeColor.b})`
         ctx.beginPath()
         ctx.moveTo(t.vertex[0].x, t.vertex[0].y) 
         ctx.lineTo(t.vertex[1].x, t.vertex[1].y)
@@ -237,7 +236,7 @@ function addToList (triangle) {
 
 function drawSquare(x, y, {r, g, b, a}, tx, ty) {
     ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`
-    ctx.fillRect(x, y, tx, ty)
+    ctx.fillRect(x, y, 1, 1)
 }
 
 function drawCircle (x, y, {r, g, b}) {
@@ -252,7 +251,6 @@ canvas.addEventListener("click", (e) => {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    // drawSquare(x, y, {r: 0, g: 0, b: 0, a: 1}, 2, 2)
 
     let r = Math.round(Math.random() * (255 - 0) + 0)
     let g = Math.round(Math.random() * (255 - 0) + 0)
@@ -289,6 +287,8 @@ canvas.addEventListener("click", (e) => {
         triangles.push(triangle)
 
         addToList(triangle)
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         drawTriangle()
         id++
         triangle = {id, vertex: [], edgeColor:{}, intersections: new Map(), minY: 999, maxY: 0}
